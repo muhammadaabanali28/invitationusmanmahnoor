@@ -21,9 +21,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Usman & Mahnoor — Wedding Invitation" },
-      { name: "description", content: "Cordially invited to the wedding ceremony of Usman Ahmed Tagala & Mahnoor Tagala — 15 December 2026, Karachi." },
+      { name: "description", content: "Cordially invited to the wedding ceremony of Usman Ahmed Tagala & Mahnoor Tagala — 15 May 2026, Karachi." },
       { property: "og:title", content: "Usman & Mahnoor — Wedding Invitation" },
-      { property: "og:description", content: "Join us in celebrating our big day. Friday, 15 December 2026 — Hassan Banquet, Karachi." },
+      { property: "og:description", content: "Join us in celebrating our big day. Friday, 15 May 2026 — Hassan Banquet, Karachi." },
     ],
   }),
   component: Invitation,
@@ -155,7 +155,7 @@ function Invitation() {
                       Mahnoor Tagala
                     </h2>
                     <p className="mt-3 font-serif-l italic text-cream/80">
-                      A heart full of grace
+                      D/O Siddique Ahmed Tagala
                     </p>
                   </div>
                 </FadeUp>
@@ -182,7 +182,7 @@ function Invitation() {
                   <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3 place-items-center">
                     <ScratchHeart reveal="15" label="Day" />
                     <ScratchHeart reveal="Friday" label="Of" />
-                    <ScratchHeart reveal="Dec 2026" label="Month" />
+                    <ScratchHeart reveal="May 2026" label="Month" />
                   </div>
                 </FadeUp>
 
@@ -222,9 +222,11 @@ function Invitation() {
                     <div className="mt-6 overflow-hidden rounded-xl border-gold border">
                       <iframe
                         title="Hassan Banquet Map"
-                        src="https://www.google.com/maps?q=Hassan+Banquet+Korangi+Karachi&output=embed"
+                        src="https://maps.google.com/maps?q=Hassan%20Banquet%20Korangi%20Karachi&t=&z=15&ie=UTF8&iwloc=&output=embed"
                         className="h-72 w-full"
                         loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        allowFullScreen
                       />
                     </div>
 
@@ -296,7 +298,7 @@ function Invitation() {
                   <div className="mt-10 flex items-center justify-center gap-3 text-gold/70">
                     <SparkIcon size={16} />
                     <span className="font-serif-l italic tracking-[0.4em] text-xs uppercase">
-                      Usman &amp; Mahnoor — 15.12.2026
+                      Usman &amp; Mahnoor — 15.05.2026
                     </span>
                     <SparkIcon size={16} />
                   </div>
@@ -305,6 +307,11 @@ function Invitation() {
                   <div className="mt-10 inline-flex items-center gap-2 text-cream/60 text-sm">
                     <Clock size={14} /> Karachi, Pakistan
                   </div>
+                </FadeUp>
+                <FadeUp delay={1.1}>
+                  <p className="mt-12 text-xs uppercase tracking-[0.3em] text-cream/50 font-serif-l">
+                    Made by Muhammad Aaban Ali
+                  </p>
                 </FadeUp>
               </div>
             </section>
