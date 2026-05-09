@@ -1,6 +1,8 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export function Sparkles({ count = 40 }: { count?: number }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const dots = useMemo(
     () =>
       Array.from({ length: count }).map((_, i) => ({
@@ -13,6 +15,7 @@ export function Sparkles({ count = 40 }: { count?: number }) {
       })),
     [count]
   );
+  if (!mounted) return null;
   return (
     <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden">
       {dots.map((d) => (
