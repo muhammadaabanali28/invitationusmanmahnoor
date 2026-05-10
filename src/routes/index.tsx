@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MapPin, ExternalLink, Heart, Sparkles as SparkIcon, Clock, Utensils, Crown } from "lucide-react";
 
 import floralBg from "@/assets/floral-bg.jpg";
@@ -17,7 +19,9 @@ import { ScratchHeart } from "@/components/wedding/ScratchHeart";
 import { Countdown } from "@/components/wedding/Countdown";
 import { MusicToggle } from "@/components/wedding/MusicToggle";
 
-export const Route = createFileRoute("/")({
+gsap.registerPlugin(ScrollTrigger);
+
+export const Route = createFileRoute("/")(  {
   head: () => ({
     meta: [
       { title: "Usman & Mahnoor — Wedding Invitation" },
@@ -32,11 +36,102 @@ export const Route = createFileRoute("/")({
 function Invitation() {
   const [loading, setLoading] = useState(true);
   const [opened, setOpened] = useState(false);
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1800);
     return () => clearTimeout(t);
   }, []);
+
+  /* ── Smooth scroll with GSAP ── */
+  useEffect(() => {
+    // Native smooth scroll enhancement via GSAP ticker
+    let currentY = window.scrollY;
+    let targetY = window.scrollY;
+    let raf: number;
+
+    const ease = 0.085;
+
+    const smoothScroll = () => {
+      targetY = window.scrollY;
+      currentY += (targetY - currentY) * ease;
+      if (Math.abs(targetY - currentY) < 0.5) currentY = targetY;
+      raf = requestAnimationFrame(smoothScroll);
+    };
+    raf = requestAnimationFrame(smoothScroll);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  /* ── GSAP ScrollTrigger animations (after open) ── */
+  useLayoutEffect(() => {
+    if (!opened) return;
+    const ctx = gsap.context(() => {
+      // Parallax on rose bg
+      gsap.to(".rose-parallax", {
+        yPercent: -20,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".rose-parallax",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
+      // Stagger reveal for event cards
+      gsap.from(".event-card", {
+        y: 60,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.2,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".event-cards-row",
+          start: "top 80%",
+        },
+      });
+
+      // Ornament spin on enter
+      gsap.from(".final-ornament", {
+        rotate: -25,
+        opacity: 0,
+        scale: 0.6,
+        duration: 1.4,
+        ease: "elastic.out(1, 0.5)",
+        scrollTrigger: {
+          trigger: ".final-ornament",
+          start: "top 85%",
+        },
+      });
+
+      // Name glow on scroll into view
+      gsap.from(".couple-names h2", {
+        opacity: 0,
+        x: (i) => (i === 0 ? -80 : 80),
+        duration: 1.2,
+        stagger: 0.3,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".couple-names",
+          start: "top 75%",
+        },
+      });
+
+      // And-circle scale in
+      gsap.from(".and-circle", {
+        scale: 0,
+        opacity: 0,
+        duration: 1,
+        ease: "elastic.out(1.2, 0.5)",
+        scrollTrigger: {
+          trigger: ".and-circle",
+          start: "top 75%",
+        },
+      });
+    }, mainRef);
+
+    return () => ctx.revert();
+  }, [opened]);
 
   const burst = () => {
     confetti({
@@ -48,7 +143,7 @@ function Invitation() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div ref={mainRef} className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Fixed luxurious bg */}
       <div
         className="fixed inset-0 z-0 bg-cover bg-center"
@@ -66,11 +161,12 @@ function Invitation() {
           <OpeningEnvelope onOpen={() => setOpened(true)} />
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }}>
-            {/* SCENE 2 */}
+
+            {/* ── SCENE 2 — BISMILLAH ── */}
             <section className="relative flex min-h-screen items-center justify-center px-6 py-24">
               <div className="max-w-3xl text-center">
                 <FadeUp>
-                  <p className="font-script text-3xl sm:text-4xl text-gold-gradient glow-text">
+                  <p className="font-script text-3xl sm:text-4xl text-gold-gradient glow-text leading-relaxed">
                     بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ
                   </p>
                 </FadeUp>
@@ -85,11 +181,12 @@ function Invitation() {
                 <Divider />
 
                 <FadeUp delay={0.2}>
-                  <p className="font-script text-4xl sm:text-5xl shimmer-text">Alhamdulillah</p>
+                  <p className="font-script text-5xl sm:text-6xl shimmer-text">Alhamdulillah</p>
                 </FadeUp>
                 <FadeUp delay={0.4}>
                   <p className="mt-4 font-display text-xl sm:text-2xl text-cream">
-                    Mr. Shabir Ahmed Tagala <span className="text-gold/80 italic">(Late)</span>
+                    Mr. Shabir Ahmed Tagala{" "}
+                    <span className="text-gold/80 italic">(Late)</span>
                   </p>
                 </FadeUp>
 
@@ -108,61 +205,48 @@ function Invitation() {
                 </FadeUp>
 
                 <FadeUp delay={1}>
-                  <p className="mt-6 font-serif-l italic text-cream/80">
-                    Of Their Beloved Grandson
-                  </p>
+                  <p className="mt-6 font-serif-l italic text-cream/80">Of Their Beloved Grandson</p>
                 </FadeUp>
               </div>
             </section>
 
-            {/* SCENE 3 — BRIDE & GROOM */}
+            {/* ── SCENE 3 — BRIDE & GROOM ── */}
             <section className="relative flex min-h-screen items-center justify-center px-6 py-24">
               <motion.div
-                className="absolute inset-0 -z-10 bg-cover bg-center opacity-25"
+                className="rose-parallax absolute inset-0 -z-10 bg-cover bg-center opacity-25"
                 style={{ backgroundImage: `url(${roses})` }}
-                initial={{ scale: 1 }}
-                whileInView={{ scale: 1.15 }}
-                transition={{ duration: 18, ease: "linear" }}
-                viewport={{ once: false }}
               />
               <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/70 to-background" />
 
-              <div className="grid w-full max-w-5xl items-center gap-12 sm:grid-cols-[1fr_auto_1fr]">
-                <FadeUp>
-                  <div className="text-center sm:text-right">
-                    <p className="font-serif-l uppercase tracking-[0.4em] text-xs text-gold/70">The Groom</p>
-                    <h2 className="mt-3 font-display text-4xl sm:text-5xl text-gold-gradient glow-text">
-                      Usman Ahmed Tagala
-                    </h2>
-                    <p className="mt-3 font-serif-l italic text-cream/80">
-                      S/O Ramzan Ahmed Tagala
-                    </p>
-                  </div>
-                </FadeUp>
+              <div className="couple-names grid w-full max-w-5xl items-center gap-12 sm:grid-cols-[1fr_auto_1fr]">
+                {/* Groom */}
+                <div className="text-center sm:text-right">
+                  <p className="font-serif-l uppercase tracking-[0.4em] text-xs text-gold/70">The Groom</p>
+                  <h2 className="mt-3 font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-tight">
+                    Usman<br />Ahmed Tagala
+                  </h2>
+                  <p className="mt-3 font-serif-l italic text-cream/80">S/O Ramzan Ahmed Tagala</p>
+                </div>
 
-                <FadeUp delay={0.4}>
-                  <div className="flex justify-center">
-                    <div className="relative flex h-32 w-32 items-center justify-center rounded-full glass animate-glow-pulse">
-                      <span className="font-script text-7xl text-gold-gradient">&amp;</span>
-                    </div>
+                {/* & circle */}
+                <div className="flex justify-center">
+                  <div className="and-circle relative flex h-32 w-32 items-center justify-center rounded-full glass animate-glow-pulse">
+                    <span className="font-script text-7xl text-gold-gradient">&amp;</span>
                   </div>
-                </FadeUp>
+                </div>
 
-                <FadeUp delay={0.6}>
-                  <div className="text-center sm:text-left">
-                    <p className="font-serif-l uppercase tracking-[0.4em] text-xs text-gold/70">The Bride</p>
-                    <h2 className="mt-3 font-display text-4xl sm:text-5xl text-gold-gradient glow-text">
-                      Mahnoor Tagala
-                    </h2>
-                    <p className="mt-3 font-serif-l italic text-cream/80">
-                      D/O Siddique Ahmed Tagala
-                    </p>
-                  </div>
-                </FadeUp>
+                {/* Bride */}
+                <div className="text-center sm:text-left">
+                  <p className="font-serif-l uppercase tracking-[0.4em] text-xs text-gold/70">The Bride</p>
+                  <h2 className="mt-3 font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-tight">
+                    Mahnoor<br />Tagala
+                  </h2>
+                  <p className="mt-3 font-serif-l italic text-cream/80">D/O Siddique Ahmed Tagala</p>
+                </div>
               </div>
             </section>
 
-            {/* SCENE 4 — SAVE THE DATE */}
+            {/* ── SCENE 4 — SAVE THE DATE / SCRATCH ── */}
             <section className="relative px-6 py-24">
               <div className="mx-auto max-w-5xl text-center">
                 <FadeUp>
@@ -179,10 +263,10 @@ function Invitation() {
                 </FadeUp>
 
                 <FadeUp delay={0.5}>
-                  <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3 place-items-center">
+                  <div className="mt-12 flex flex-wrap justify-center gap-10">
                     <ScratchHeart reveal="15" label="Day" />
                     <ScratchHeart reveal="Friday" label="Of" />
-                    <ScratchHeart reveal="May 2026" label="Month" />
+                    <ScratchHeart reveal="May 2026" label="Month & Year" />
                   </div>
                 </FadeUp>
 
@@ -200,7 +284,7 @@ function Invitation() {
               </div>
             </section>
 
-            {/* SCENE 5 — LOCATION */}
+            {/* ── SCENE 5 — VENUE ── */}
             <section className="relative px-6 py-24">
               <div className="mx-auto max-w-4xl text-center">
                 <FadeUp>
@@ -244,50 +328,48 @@ function Invitation() {
               </div>
             </section>
 
-            {/* SCENE 6 — EVENT TIMINGS */}
+            {/* ── SCENE 6 — EVENT TIMINGS ── */}
             <section className="relative px-6 py-24">
               <div className="mx-auto max-w-5xl text-center">
                 <FadeUp>
                   <h2 className="font-display text-4xl sm:text-5xl text-gold-gradient">Event Timings</h2>
                 </FadeUp>
                 <Divider />
-                <div className="grid gap-6 sm:grid-cols-3">
+                <div className="event-cards-row grid gap-6 sm:grid-cols-3">
                   {[
                     { icon: Crown, name: "Barat", time: "07 PM" },
                     { icon: Utensils, name: "Dinner", time: "08 PM" },
                     { icon: Heart, name: "Rukhsati", time: "09 PM" },
                   ].map((c, i) => (
-                    <FadeUp key={c.name} delay={i * 0.15}>
-                      <motion.div
-                        whileHover={{ y: -8, scale: 1.03 }}
-                        transition={{ type: "spring", stiffness: 200 }}
-                        onClick={burst}
-                        className="glass rounded-2xl p-8 cursor-pointer animate-float-slow"
-                      >
-                        <c.icon className="mx-auto text-gold" size={36} />
-                        <p className="mt-4 font-display text-2xl text-cream">{c.name}</p>
-                        <Divider />
-                        <p className="font-script text-4xl text-gold-gradient glow-text">{c.time}</p>
-                      </motion.div>
-                    </FadeUp>
+                    <motion.div
+                      key={c.name}
+                      className="event-card glass rounded-2xl p-8 cursor-pointer"
+                      whileHover={{ y: -10, scale: 1.04, boxShadow: "0 20px 40px rgba(212,175,55,0.2)" }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ type: "spring", stiffness: 250, damping: 18 }}
+                      onClick={burst}
+                    >
+                      <c.icon className="mx-auto text-gold" size={36} />
+                      <p className="mt-4 font-display text-2xl text-cream">{c.name}</p>
+                      <Divider />
+                      <p className="font-script text-5xl text-gold-gradient glow-text">{c.time}</p>
+                    </motion.div>
                   ))}
                 </div>
               </div>
             </section>
 
-            {/* FINAL */}
+            {/* ── FINAL ── */}
             <section className="relative flex min-h-[80vh] items-center justify-center px-6 py-24">
               <div className="text-center max-w-3xl">
-                <FadeUp>
-                  <img
-                    src={ornament}
-                    alt=""
-                    width={1024}
-                    height={512}
-                    loading="lazy"
-                    className="mx-auto w-72 opacity-80"
-                  />
-                </FadeUp>
+                <img
+                  src={ornament}
+                  alt=""
+                  width={1024}
+                  height={512}
+                  loading="lazy"
+                  className="final-ornament mx-auto w-72 opacity-80"
+                />
                 <FadeUp delay={0.3}>
                   <p className="mt-6 font-script text-4xl sm:text-6xl text-gold-gradient glow-text">
                     Your Presence Will Make
@@ -315,6 +397,7 @@ function Invitation() {
                 </FadeUp>
               </div>
             </section>
+
           </motion.div>
         )}
       </main>
