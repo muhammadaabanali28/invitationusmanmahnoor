@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 const TARGET = new Date("2026-05-15T19:00:00+05:00").getTime();
 
 export function Countdown() {
-  const [t, setT] = useState(() => TARGET - Date.now());
+  const [mounted, setMounted] = useState(false);
+  const [t, setT] = useState(0);
   useEffect(() => {
+    setMounted(true);
+    setT(TARGET - Date.now());
     const i = setInterval(() => setT(TARGET - Date.now()), 1000);
     return () => clearInterval(i);
   }, []);
-  const clamp = Math.max(0, t);
+  const clamp = mounted ? Math.max(0, t) : 0;
   const d = Math.floor(clamp / 86400000);
   const h = Math.floor((clamp / 3600000) % 24);
   const m = Math.floor((clamp / 60000) % 60);
