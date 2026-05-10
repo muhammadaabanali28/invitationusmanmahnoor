@@ -253,7 +253,7 @@ function Invitation() {
                 </FadeUp>
 
                 <FadeUp delay={0.5}>
-                  <div className="mt-12 flex flex-wrap justify-center gap-10 sm:gap-16">
+                  <div className="mt-10 grid grid-cols-1 justify-items-center gap-8 sm:mt-12 sm:grid-cols-3 sm:gap-8 lg:gap-12">
                     <ScratchHeart reveal="15" label="Day" />
                     <ScratchHeart reveal="Friday" label="Of" />
                     <ScratchHeart reveal="May 2026" label="Month & Year" />
