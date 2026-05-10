@@ -17,7 +17,7 @@ import { OpeningEnvelope } from "@/components/wedding/OpeningEnvelope";
 import { FadeUp, Divider } from "@/components/wedding/SectionTitle";
 import { ScratchHeart } from "@/components/wedding/ScratchHeart";
 import { Countdown } from "@/components/wedding/Countdown";
-import { MusicToggle } from "@/components/wedding/MusicToggle";
+import { MusicToggle, type MusicToggleHandle } from "@/components/wedding/MusicToggle";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,100 +37,89 @@ function Invitation() {
   const [loading, setLoading] = useState(true);
   const [opened, setOpened] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
+  const musicRef = useRef<MusicToggleHandle>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1800);
     return () => clearTimeout(t);
   }, []);
 
-  /* ── Smooth scroll with GSAP ── */
-  useEffect(() => {
-    // Native smooth scroll enhancement via GSAP ticker
-    let currentY = window.scrollY;
-    let targetY = window.scrollY;
-    let raf: number;
-
-    const ease = 0.085;
-
-    const smoothScroll = () => {
-      targetY = window.scrollY;
-      currentY += (targetY - currentY) * ease;
-      if (Math.abs(targetY - currentY) < 0.5) currentY = targetY;
-      raf = requestAnimationFrame(smoothScroll);
-    };
-    raf = requestAnimationFrame(smoothScroll);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  // Handle envelope open — play music immediately (inside user gesture chain)
+  const handleOpen = () => {
+    setOpened(true);
+    musicRef.current?.play();
+  };
 
   /* ── GSAP ScrollTrigger animations (after open) ── */
   useLayoutEffect(() => {
     if (!opened) return;
-    const ctx = gsap.context(() => {
-      // Parallax on rose bg
-      gsap.to(".rose-parallax", {
-        yPercent: -20,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".rose-parallax",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
 
-      // Stagger reveal for event cards
-      gsap.from(".event-card", {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".event-cards-row",
-          start: "top 80%",
-        },
-      });
+    // Small delay so elements are rendered before GSAP reads them
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
 
-      // Ornament spin on enter
-      gsap.from(".final-ornament", {
-        rotate: -25,
-        opacity: 0,
-        scale: 0.6,
-        duration: 1.4,
-        ease: "elastic.out(1, 0.5)",
-        scrollTrigger: {
-          trigger: ".final-ornament",
-          start: "top 85%",
-        },
-      });
+        // Parallax on rose bg
+        gsap.to(".rose-parallax", {
+          yPercent: -20,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".scene-couple",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
 
-      // Name glow on scroll into view
-      gsap.from(".couple-names h2", {
-        opacity: 0,
-        x: (i) => (i === 0 ? -80 : 80),
-        duration: 1.2,
-        stagger: 0.3,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".couple-names",
-          start: "top 75%",
-        },
-      });
+        // Couple names slide in from sides
+        gsap.from(".groom-name", {
+          opacity: 0,
+          x: -100,
+          duration: 1.3,
+          ease: "power3.out",
+          scrollTrigger: { trigger: ".couple-names", start: "top 78%" },
+        });
+        gsap.from(".bride-name", {
+          opacity: 0,
+          x: 100,
+          duration: 1.3,
+          ease: "power3.out",
+          scrollTrigger: { trigger: ".couple-names", start: "top 78%" },
+        });
+        gsap.from(".and-circle", {
+          scale: 0,
+          opacity: 0,
+          duration: 1.1,
+          delay: 0.4,
+          ease: "elastic.out(1.2, 0.5)",
+          scrollTrigger: { trigger: ".couple-names", start: "top 78%" },
+        });
 
-      // And-circle scale in
-      gsap.from(".and-circle", {
-        scale: 0,
-        opacity: 0,
-        duration: 1,
-        ease: "elastic.out(1.2, 0.5)",
-        scrollTrigger: {
-          trigger: ".and-circle",
-          start: "top 75%",
-        },
-      });
-    }, mainRef);
+        // Event cards stagger
+        gsap.from(".event-card", {
+          y: 70,
+          opacity: 0,
+          duration: 0.9,
+          stagger: 0.18,
+          ease: "power3.out",
+          scrollTrigger: { trigger: ".event-cards-row", start: "top 82%" },
+        });
 
-    return () => ctx.revert();
+        // Final ornament spin
+        gsap.from(".final-ornament", {
+          rotate: -30,
+          opacity: 0,
+          scale: 0.5,
+          duration: 1.5,
+          ease: "elastic.out(1, 0.55)",
+          scrollTrigger: { trigger: ".final-ornament", start: "top 88%" },
+        });
+
+      }, mainRef);
+
+      return () => ctx.revert();
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [opened]);
 
   const burst = () => {
@@ -144,21 +133,20 @@ function Invitation() {
 
   return (
     <div ref={mainRef} className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* Fixed luxurious bg */}
-      <div
-        className="fixed inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${floralBg})` }}
-      />
+      {/* Fixed bg */}
+      <div className="fixed inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${floralBg})` }} />
       <div className="fixed inset-0 z-[1] bg-background/80" />
       <Sparkles count={50} />
       <PetalsBackground count={26} />
 
       <AnimatePresence>{loading && <Loader />}</AnimatePresence>
-      <MusicToggle start={opened} />
+
+      {/* Music toggle — always rendered so audioRef is ready */}
+      <MusicToggle ref={musicRef} />
 
       <main className="relative z-10">
         {!opened ? (
-          <OpeningEnvelope onOpen={() => setOpened(true)} />
+          <OpeningEnvelope onOpen={handleOpen} />
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }}>
 
@@ -166,82 +154,80 @@ function Invitation() {
             <section className="relative flex min-h-screen items-center justify-center px-6 py-24">
               <div className="max-w-3xl text-center">
                 <FadeUp>
-                  <p className="font-script text-3xl sm:text-4xl text-gold-gradient glow-text leading-relaxed">
+                  <p className="font-script text-3xl sm:text-5xl text-gold-gradient glow-text leading-relaxed tracking-wide">
                     بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ
                   </p>
                 </FadeUp>
                 <FadeUp delay={0.3}>
-                  <p className="mt-4 font-display italic text-lg sm:text-2xl text-cream/90">
-                    In The Name Of Allah,
-                    <br />
+                  <p className="mt-5 font-display italic text-lg sm:text-2xl text-cream/90 leading-loose">
+                    In The Name Of Allah,<br />
                     The Most Beneficent &amp; The Most Merciful
                   </p>
                 </FadeUp>
-
                 <Divider />
-
                 <FadeUp delay={0.2}>
-                  <p className="font-script text-5xl sm:text-6xl shimmer-text">Alhamdulillah</p>
+                  <p className="font-script text-5xl sm:text-7xl shimmer-text leading-tight">Alhamdulillah</p>
                 </FadeUp>
-                <FadeUp delay={0.4}>
-                  <p className="mt-4 font-display text-xl sm:text-2xl text-cream">
+                <FadeUp delay={0.45}>
+                  <p className="mt-5 font-display text-xl sm:text-2xl text-cream">
                     Mr. Shabir Ahmed Tagala{" "}
-                    <span className="text-gold/80 italic">(Late)</span>
+                    <span className="text-gold/75 italic">(Late)</span>
                   </p>
                 </FadeUp>
-
-                <FadeUp delay={0.6}>
-                  <p className="mt-10 font-serif-l italic text-base sm:text-lg text-cream/80 leading-relaxed">
-                    Cordially Invite You To Attend
-                    <br />
+                <FadeUp delay={0.65}>
+                  <p className="mt-10 font-serif-l italic text-base sm:text-lg text-cream/75 leading-relaxed">
+                    Cordially Invite You To Attend<br />
                     The Wedding Ceremony
                   </p>
                 </FadeUp>
-
-                <FadeUp delay={0.8}>
+                <FadeUp delay={0.85}>
                   <p className="mt-8 font-display text-2xl sm:text-3xl text-gold-gradient">
                     N. Shabir Ahmed Tagala
                   </p>
                 </FadeUp>
-
-                <FadeUp delay={1}>
-                  <p className="mt-6 font-serif-l italic text-cream/80">Of Their Beloved Grandson</p>
+                <FadeUp delay={1.05}>
+                  <p className="mt-6 font-serif-l italic text-cream/75">Of Their Beloved Grandson</p>
                 </FadeUp>
               </div>
             </section>
 
             {/* ── SCENE 3 — BRIDE & GROOM ── */}
-            <section className="relative flex min-h-screen items-center justify-center px-6 py-24">
-              <motion.div
-                className="rose-parallax absolute inset-0 -z-10 bg-cover bg-center opacity-25"
+            <section className="scene-couple relative flex min-h-screen items-center justify-center px-6 py-24">
+              <div
+                className="rose-parallax absolute inset-0 -z-10 bg-cover bg-center opacity-22"
                 style={{ backgroundImage: `url(${roses})` }}
               />
-              <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/70 to-background" />
+              <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/65 to-background" />
 
-              <div className="couple-names grid w-full max-w-5xl items-center gap-12 sm:grid-cols-[1fr_auto_1fr]">
+              <div className="couple-names grid w-full max-w-5xl items-center gap-14 sm:grid-cols-[1fr_auto_1fr]">
                 {/* Groom */}
-                <div className="text-center sm:text-right">
-                  <p className="font-serif-l uppercase tracking-[0.4em] text-xs text-gold/70">The Groom</p>
-                  <h2 className="mt-3 font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-tight">
+                <div className="groom-name text-center sm:text-right">
+                  <p className="font-serif-l uppercase tracking-[0.45em] text-xs text-gold/65 mb-3">The Groom</p>
+                  <h2 className="font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-snug">
                     Usman<br />Ahmed Tagala
                   </h2>
-                  <p className="mt-3 font-serif-l italic text-cream/80">S/O Ramzan Ahmed Tagala</p>
+                  <p className="mt-4 font-serif-l italic text-cream/75 text-sm">S/O Ramzan Ahmed Tagala</p>
                 </div>
 
                 {/* & circle */}
                 <div className="flex justify-center">
                   <div className="and-circle relative flex h-32 w-32 items-center justify-center rounded-full glass animate-glow-pulse">
-                    <span className="font-script text-7xl text-gold-gradient">&amp;</span>
+                    <span className="font-script text-7xl text-gold-gradient leading-none">&amp;</span>
+                    <motion.span
+                      className="absolute inset-0 rounded-full border border-gold/30"
+                      animate={{ scale: [1, 1.25], opacity: [0.5, 0] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+                    />
                   </div>
                 </div>
 
                 {/* Bride */}
-                <div className="text-center sm:text-left">
-                  <p className="font-serif-l uppercase tracking-[0.4em] text-xs text-gold/70">The Bride</p>
-                  <h2 className="mt-3 font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-tight">
+                <div className="bride-name text-center sm:text-left">
+                  <p className="font-serif-l uppercase tracking-[0.45em] text-xs text-gold/65 mb-3">The Bride</p>
+                  <h2 className="font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-snug">
                     Mahnoor<br />Tagala
                   </h2>
-                  <p className="mt-3 font-serif-l italic text-cream/80">D/O Siddique Ahmed Tagala</p>
+                  <p className="mt-4 font-serif-l italic text-cream/75 text-sm">D/O Siddique Ahmed Tagala</p>
                 </div>
               </div>
             </section>
@@ -250,34 +236,38 @@ function Invitation() {
             <section className="relative px-6 py-24">
               <div className="mx-auto max-w-5xl text-center">
                 <FadeUp>
-                  <p className="font-script text-5xl sm:text-6xl text-gold-gradient glow-text">Save The Date</p>
+                  <p className="font-script text-6xl sm:text-7xl text-gold-gradient glow-text leading-tight">
+                    Save The Date
+                  </p>
                 </FadeUp>
-                <FadeUp delay={0.2}>
-                  <p className="mt-2 font-serif-l italic text-cream/80 text-lg">Reveal Our Big Day</p>
+                <FadeUp delay={0.25}>
+                  <p className="mt-3 font-serif-l italic text-cream/75 text-lg tracking-wide">
+                    Reveal Our Big Day
+                  </p>
                 </FadeUp>
                 <Divider />
-                <FadeUp delay={0.3}>
-                  <p className="font-display tracking-[0.3em] uppercase text-sm text-gold/80">
+                <FadeUp delay={0.35}>
+                  <p className="font-display tracking-[0.3em] uppercase text-sm text-gold/75">
                     Scratch The Hearts To Reveal
                   </p>
                 </FadeUp>
 
                 <FadeUp delay={0.5}>
-                  <div className="mt-12 flex flex-wrap justify-center gap-10">
+                  <div className="mt-12 flex flex-wrap justify-center gap-10 sm:gap-16">
                     <ScratchHeart reveal="15" label="Day" />
                     <ScratchHeart reveal="Friday" label="Of" />
                     <ScratchHeart reveal="May 2026" label="Month & Year" />
                   </div>
                 </FadeUp>
 
-                <FadeUp delay={0.6}>
-                  <p className="mt-16 font-script text-4xl sm:text-5xl shimmer-text">
+                <FadeUp delay={0.65}>
+                  <p className="mt-16 font-script text-4xl sm:text-6xl shimmer-text leading-tight">
                     The Start Of A Beautiful Journey
                   </p>
                 </FadeUp>
 
-                <FadeUp delay={0.8}>
-                  <div className="mt-10">
+                <FadeUp delay={0.85}>
+                  <div className="mt-12">
                     <Countdown />
                   </div>
                 </FadeUp>
@@ -292,18 +282,15 @@ function Invitation() {
                 </FadeUp>
                 <Divider />
                 <FadeUp delay={0.2}>
-                  <div className="glass rounded-2xl p-8 animate-glow-pulse">
-                    <MapPin className="mx-auto mb-3 text-gold" />
+                  <div className="glass rounded-2xl p-8 sm:p-10 animate-glow-pulse">
+                    <MapPin className="mx-auto mb-4 text-gold" size={28} />
                     <p className="font-display text-2xl sm:text-3xl text-cream">Hassan Banquet</p>
-                    <p className="mt-3 font-serif-l text-cream/80 leading-relaxed">
-                      Gate No 1, Coast Guard Chowrangi
-                      <br />
-                      Near Byco Petrol Pump
-                      <br />
-                      Korangi 2 1/2, Karachi
+                    <p className="mt-4 font-serif-l text-cream/75 leading-relaxed text-base sm:text-lg">
+                      Gate No 1, Coast Guard Chowrangi<br />
+                      Near Byco Petrol Pump<br />
+                      Korangi 2½, Karachi
                     </p>
-
-                    <div className="mt-6 overflow-hidden rounded-xl border-gold border">
+                    <div className="mt-7 overflow-hidden rounded-xl border border-gold/30">
                       <iframe
                         title="Hassan Banquet Map"
                         src="https://maps.google.com/maps?q=Hassan%20Banquet%20Korangi%20Karachi&t=&z=15&ie=UTF8&iwloc=&output=embed"
@@ -313,13 +300,12 @@ function Invitation() {
                         allowFullScreen
                       />
                     </div>
-
                     <a
                       href="https://www.google.com/maps/search/?api=1&query=Hassan+Banquet+Korangi+Karachi"
                       target="_blank"
                       rel="noreferrer"
                       onClick={burst}
-                      className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-gold/90 to-gold-soft/90 px-8 py-3 font-display text-ink shadow-[var(--shadow-gold)] hover:scale-105 transition-transform"
+                      className="mt-7 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-gold/90 to-gold-soft/90 px-8 py-3 font-display text-ink shadow-[0_4px_24px_rgba(212,175,55,0.35)] hover:scale-105 transition-transform"
                     >
                       Open Location <ExternalLink size={16} />
                     </a>
@@ -340,11 +326,11 @@ function Invitation() {
                     { icon: Crown, name: "Barat", time: "07 PM" },
                     { icon: Utensils, name: "Dinner", time: "08 PM" },
                     { icon: Heart, name: "Rukhsati", time: "09 PM" },
-                  ].map((c, i) => (
+                  ].map((c) => (
                     <motion.div
                       key={c.name}
                       className="event-card glass rounded-2xl p-8 cursor-pointer"
-                      whileHover={{ y: -10, scale: 1.04, boxShadow: "0 20px 40px rgba(212,175,55,0.2)" }}
+                      whileHover={{ y: -10, scale: 1.04, boxShadow: "0 20px 40px rgba(212,175,55,0.25)" }}
                       whileTap={{ scale: 0.97 }}
                       transition={{ type: "spring", stiffness: 250, damping: 18 }}
                       onClick={burst}
@@ -371,13 +357,12 @@ function Invitation() {
                   className="final-ornament mx-auto w-72 opacity-80"
                 />
                 <FadeUp delay={0.3}>
-                  <p className="mt-6 font-script text-4xl sm:text-6xl text-gold-gradient glow-text">
-                    Your Presence Will Make
-                    <br /> Our Day More Special
+                  <p className="mt-6 font-script text-4xl sm:text-6xl text-gold-gradient glow-text leading-snug">
+                    Your Presence Will Make<br /> Our Day More Special
                   </p>
                 </FadeUp>
                 <FadeUp delay={0.6}>
-                  <div className="mt-10 flex items-center justify-center gap-3 text-gold/70">
+                  <div className="mt-10 flex items-center justify-center gap-3 text-gold/65">
                     <SparkIcon size={16} />
                     <span className="font-serif-l italic tracking-[0.4em] text-xs uppercase">
                       Usman &amp; Mahnoor — 15.05.2026
@@ -386,12 +371,12 @@ function Invitation() {
                   </div>
                 </FadeUp>
                 <FadeUp delay={0.9}>
-                  <div className="mt-10 inline-flex items-center gap-2 text-cream/60 text-sm">
+                  <div className="mt-8 inline-flex items-center gap-2 text-cream/55 text-sm font-serif-l">
                     <Clock size={14} /> Karachi, Pakistan
                   </div>
                 </FadeUp>
                 <FadeUp delay={1.1}>
-                  <p className="mt-12 text-xs uppercase tracking-[0.3em] text-cream/50 font-serif-l">
+                  <p className="mt-10 text-xs uppercase tracking-[0.3em] text-cream/45 font-serif-l">
                     Made by Muhammad Aaban Ali
                   </p>
                 </FadeUp>
