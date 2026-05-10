@@ -1,23 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Music2, VolumeX } from "lucide-react";
 import { motion } from "framer-motion";
 
-export function MusicToggle({ start }: { start: boolean }) {
+export interface MusicToggleHandle {
+  play: () => void;
+}
+
+export const MusicToggle = forwardRef<MusicToggleHandle, object>((_props, ref) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
 
-  useEffect(() => {
-    if (!start || !audioRef.current) return;
-    audioRef.current.volume = 0.4;
-    // Small delay so envelope animation completes first
-    const t = setTimeout(() => {
+  // Expose play() to parent — called directly inside user click handler
+  useImperativeHandle(ref, () => ({
+    play() {
+      if (!audioRef.current) return;
+      audioRef.current.volume = 0.4;
       audioRef.current
-        ?.play()
+        .play()
         .then(() => setPlaying(true))
         .catch(() => setPlaying(false));
-    }, 800);
-    return () => clearTimeout(t);
-  }, [start]);
+    },
+  }));
 
   const toggle = () => {
     if (!audioRef.current) return;
@@ -47,15 +50,17 @@ export function MusicToggle({ start }: { start: boolean }) {
         >
           {playing ? <Music2 size={22} /> : <VolumeX size={22} />}
         </motion.div>
-        {/* Ripple when playing */}
+        {/* Ripple ring when playing */}
         {playing && (
           <motion.span
             className="absolute inset-0 rounded-full border border-gold/40"
-            animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
+            animate={{ scale: [1, 1.7], opacity: [0.6, 0] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
           />
         )}
       </motion.button>
     </>
   );
-}
+});
+
+MusicToggle.displayName = "MusicToggle";
