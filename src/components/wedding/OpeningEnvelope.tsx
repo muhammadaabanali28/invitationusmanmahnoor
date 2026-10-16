@@ -1,6 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import confetti from "canvas-confetti";
+import { celebrationColors } from "@/lib/invitation";
+import { Button } from "@/components/ui/button";
+const AnimatedButton = motion.create(Button);
 
 export function OpeningEnvelope({ onOpen }: { onOpen: () => void }) {
   const [opened, setOpened] = useState(false);
@@ -26,7 +29,7 @@ export function OpeningEnvelope({ onOpen }: { onOpen: () => void }) {
       particleCount: 180,
       spread: 110,
       origin: { y: 0.6 },
-      colors: ["#d4af37", "#f5e6a8", "#fff8e7", "#a07d2a"],
+      colors: celebrationColors(),
     });
 
     setTimeout(onOpen, 1700);
@@ -43,7 +46,9 @@ export function OpeningEnvelope({ onOpen }: { onOpen: () => void }) {
         <div className="absolute inset-0 bg-radial-gold opacity-60" />
         <div className="relative" style={{ perspective: 1200 }}>
           {/* Envelope back */}
-          <motion.div
+          <AnimatedButton
+            aria-label="Open N & K engagement invitation"
+            variant="ghost"
             className="relative h-72 w-72 sm:h-80 sm:w-80 rounded-full glass animate-glow-pulse cursor-pointer"
             onClick={handleClick}
             whileHover={{ scale: opened ? 1 : 1.04 }}
@@ -61,7 +66,7 @@ export function OpeningEnvelope({ onOpen }: { onOpen: () => void }) {
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
               <p className="font-display text-6xl sm:text-7xl text-gold-gradient glow-text tracking-wide">
-                U &amp; M
+                N &amp; K
               </p>
               <span className="mt-3 h-px w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
               <p className="mt-3 font-script text-2xl text-cream/90">Click Me</p>
@@ -69,10 +74,10 @@ export function OpeningEnvelope({ onOpen }: { onOpen: () => void }) {
             {/* ornate ring */}
             <div className="absolute -inset-3 rounded-full border border-gold/30" />
             <div className="absolute -inset-6 rounded-full border border-gold/15" />
-          </motion.div>
+          </AnimatedButton>
         </div>
-        <p className="absolute bottom-10 left-1/2 -translate-x-1/2 font-serif-l italic text-gold/60 text-sm tracking-[0.3em]">
-          A WEDDING INVITATION
+        <p className="absolute bottom-10 left-1/2 -translate-x-1/2 font-serif-l italic text-gold/60 text-sm tracking-[0.12em] whitespace-nowrap">
+          AN ENGAGEMENT INVITATION
         </p>
       </motion.section>
     </AnimatePresence>
