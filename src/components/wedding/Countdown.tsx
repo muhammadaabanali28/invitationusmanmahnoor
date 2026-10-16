@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const TARGET = new Date("2026-05-15T19:00:00+05:00").getTime();
+import { targetTime as TARGET } from "@/lib/invitation";
 
 export function Countdown() {
   const [mounted, setMounted] = useState(false);

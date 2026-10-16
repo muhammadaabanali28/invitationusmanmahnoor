@@ -23,7 +23,7 @@ export function PetalsBackground({ count = 22 }: { count?: number }) {
       {petals.map((p) => (
         <span
           key={p.id}
-          className="absolute animate-petal"
+          className="absolute animate-petal-fall"
           style={{
             left: `${p.left}%`,
             top: 0,
@@ -36,12 +36,12 @@ export function PetalsBackground({ count = 22 }: { count?: number }) {
             transform: `rotate(${p.rotate}deg)`,
           }}
         >
-          <svg viewBox="0 0 32 32" className="h-full w-full drop-shadow-[0_0_6px_rgba(212,175,55,0.6)]">
+          <svg viewBox="0 0 32 32" className="h-full w-full">
             <defs>
               <radialGradient id={`pg${p.id}`} cx="50%" cy="40%" r="60%">
-                <stop offset="0%" stopColor="#fff5d6" />
-                <stop offset="60%" stopColor="#e6c878" />
-                <stop offset="100%" stopColor="#a07d2a" />
+                <stop offset="0%" stopColor="var(--petal-light)" />
+                <stop offset="60%" stopColor="var(--petal-pink)" />
+                <stop offset="100%" stopColor="var(--petal-green)" />
               </radialGradient>
             </defs>
             <path

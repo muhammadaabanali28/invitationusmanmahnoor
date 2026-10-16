@@ -40,7 +40,7 @@ export const MusicToggle = forwardRef<MusicToggleHandle, object>((_props, ref) =
         aria-label="Toggle music"
         whileHover={{ scale: 1.15 }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 z-[60] flex h-14 w-14 items-center justify-center rounded-full glass text-gold animate-glow-pulse hover:shadow-[0_0_20px_rgba(212,175,55,0.5)] transition-shadow"
+        className="fixed bottom-6 right-6 z-[60] flex h-14 w-14 items-center justify-center rounded-full glass text-gold animate-glow-pulse hover:shadow-sm transition-shadow"
       >
         <motion.div
           key={playing ? "playing" : "paused"}

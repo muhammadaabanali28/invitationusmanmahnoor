@@ -21,7 +21,7 @@ export function Sparkles({ count = 40 }: { count?: number }) {
       {dots.map((d) => (
         <span
           key={d.id}
-          className="absolute rounded-full bg-gold animate-sparkle"
+          className="absolute rounded-full bg-gold animate-sparkle-pop"
           style={{
             top: `${d.top}%`,
             left: `${d.left}%`,
@@ -29,7 +29,7 @@ export function Sparkles({ count = 40 }: { count?: number }) {
             height: d.size,
             animationDelay: `${d.delay}s`,
             animationDuration: `${d.duration}s`,
-            boxShadow: "0 0 8px rgba(212,175,55,0.9), 0 0 16px rgba(212,175,55,0.5)",
+            boxShadow: "var(--shadow-gold)",
           }}
         />
       ))}

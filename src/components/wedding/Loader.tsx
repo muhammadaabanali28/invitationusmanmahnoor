@@ -17,7 +17,7 @@ export function Loader() {
             transition={{ duration: 2, ease: "linear", repeat: Infinity }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-script text-4xl text-gold-gradient">U &amp; M</span>
+            <span className="font-script text-4xl text-gold-gradient">N &amp; K</span>
           </div>
         </div>
         <p className="mt-8 font-display tracking-[0.4em] text-xs text-gold/70">LOADING INVITATION</p>

@@ -6,9 +6,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MapPin, ExternalLink, Heart, Sparkles as SparkIcon, Clock, Utensils, Crown } from "lucide-react";
 
-import floralBg from "@/assets/floral-bg.jpg";
-import roses from "@/assets/roses.jpg";
-import ornament from "@/assets/ornament.png";
+import floralBg from "@/assets/engagement-florals.jpg";
+import { invitation, celebrationColors } from "@/lib/invitation";
+import { Button } from "@/components/ui/button";
 
 import { Loader } from "@/components/wedding/Loader";
 import { PetalsBackground } from "@/components/wedding/PetalsBackground";
@@ -24,10 +24,12 @@ gsap.registerPlugin(ScrollTrigger);
 export const Route = createFileRoute("/")(  {
   head: () => ({
     meta: [
-      { title: "Usman & Mahnoor — Wedding Invitation" },
-      { name: "description", content: "Cordially invited to the wedding ceremony of Usman Ahmed Tagala & Mahnoor Tagala — 15 May 2026, Karachi." },
-      { property: "og:title", content: "Usman & Mahnoor — Wedding Invitation" },
-      { property: "og:description", content: "Join us in celebrating our big day. Friday, 15 May 2026 — Hassan Banquet, Karachi." },
+      { title: "Noor ul Ain & Khaliq — Engagement Invitation" },
+      { name: "description", content: "Celebrate the engagement of Noor ul Ain and Khaliq, 18 October 2026, after Maghrib at 6:30 PM, P&T Society, Korangi, Karachi." },
+      { property: "og:title", content: "Noor ul Ain & Khaliq — Engagement Invitation" },
+      { property: "og:description", content: "Join Noor ul Ain and Khaliq for their engagement on Sunday, 18 October 2026, at 6:30 PM in Karachi." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Invitation,
@@ -127,7 +129,7 @@ function Invitation() {
       particleCount: 90,
       spread: 70,
       origin: { y: 0.7 },
-      colors: ["#d4af37", "#f5e6a8", "#fff8e7"],
+      colors: celebrationColors(),
     });
   };
 
@@ -135,7 +137,7 @@ function Invitation() {
     <div ref={mainRef} className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Fixed bg */}
       <div className="fixed inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${floralBg})` }} />
-      <div className="fixed inset-0 z-[1] bg-background/80" />
+      <div className="fixed inset-0 z-[1] bg-background/20" />
       <Sparkles count={50} />
       <PetalsBackground count={26} />
 
@@ -169,24 +171,9 @@ function Invitation() {
                   <p className="font-script text-5xl sm:text-7xl shimmer-text leading-tight">Alhamdulillah</p>
                 </FadeUp>
                 <FadeUp delay={0.45}>
-                  <p className="mt-5 font-display text-xl sm:text-2xl text-cream">
-                    Mr. Shabir Ahmed Tagala{" "}
-                    <span className="text-gold/75 italic">(Late)</span>
+                  <p className="mt-8 font-serif-l italic text-lg text-foreground/80 leading-relaxed">
+                    Cordially Invited To Celebrate<br />Our Engagement
                   </p>
-                </FadeUp>
-                <FadeUp delay={0.65}>
-                  <p className="mt-10 font-serif-l italic text-base sm:text-lg text-cream/75 leading-relaxed">
-                    Cordially Invite You To Attend<br />
-                    The Wedding Ceremony
-                  </p>
-                </FadeUp>
-                <FadeUp delay={0.85}>
-                  <p className="mt-8 font-display text-2xl sm:text-3xl text-gold-gradient">
-                    N. Shabir Ahmed Tagala
-                  </p>
-                </FadeUp>
-                <FadeUp delay={1.05}>
-                  <p className="mt-6 font-serif-l italic text-cream/75">Of Their Beloved Grandson</p>
                 </FadeUp>
               </div>
             </section>
@@ -194,8 +181,8 @@ function Invitation() {
             {/* ── SCENE 3 — BRIDE & GROOM ── */}
             <section className="scene-couple relative flex min-h-screen items-center justify-center px-6 py-24">
               <div
-                className="rose-parallax absolute inset-0 -z-10 bg-cover bg-center opacity-22"
-                style={{ backgroundImage: `url(${roses})` }}
+                className="rose-parallax absolute inset-0 -z-10 bg-cover bg-center opacity-30"
+                style={{ backgroundImage: `url(${floralBg})` }}
               />
               <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/65 to-background" />
 
@@ -204,9 +191,9 @@ function Invitation() {
                 <div className="groom-name text-center sm:text-right">
                   <p className="font-serif-l uppercase tracking-[0.45em] text-xs text-gold/65 mb-3">The Groom</p>
                   <h2 className="font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-snug">
-                    Usman<br />Ahmed Tagala
+                    {invitation.groom}
                   </h2>
-                  <p className="mt-4 font-serif-l italic text-cream/75 text-sm">S/O Ramzan Ahmed Tagala</p>
+                  
                 </div>
 
                 {/* & circle */}
@@ -225,9 +212,9 @@ function Invitation() {
                 <div className="bride-name text-center sm:text-left">
                   <p className="font-serif-l uppercase tracking-[0.45em] text-xs text-gold/65 mb-3">The Bride</p>
                   <h2 className="font-display text-4xl sm:text-5xl text-gold-gradient glow-text leading-snug">
-                    Mahnoor<br />Tagala
+                    Noor ul Ain
                   </h2>
-                  <p className="mt-4 font-serif-l italic text-cream/75 text-sm">D/O Siddique Ahmed Tagala</p>
+                  <p className="mt-4 font-serif-l italic text-cream/75 text-sm">{invitation.brideParent}</p>
                 </div>
               </div>
             </section>
@@ -248,15 +235,15 @@ function Invitation() {
                 <Divider />
                 <FadeUp delay={0.35}>
                   <p className="font-display tracking-[0.3em] uppercase text-sm text-gold/75">
-                    Scratch The Hearts To Reveal
+                    Our Engagement
                   </p>
                 </FadeUp>
 
                 <FadeUp delay={0.5}>
                   <div className="mt-10 grid grid-cols-1 justify-items-center gap-8 sm:mt-12 sm:grid-cols-3 sm:gap-8 lg:gap-12">
-                    <ScratchHeart reveal="15" label="Day" />
-                    <ScratchHeart reveal="Friday" label="Of" />
-                    <ScratchHeart reveal="May 2026" label="Month & Year" />
+                    <ScratchHeart reveal={invitation.day} label="Day" />
+                    <ScratchHeart reveal={invitation.weekday} label="Day of the Week" />
+                    <ScratchHeart reveal={invitation.monthYear} label="Month & Year" />
                   </div>
                 </FadeUp>
 
@@ -282,33 +269,31 @@ function Invitation() {
                 </FadeUp>
                 <Divider />
                 <FadeUp delay={0.2}>
-                  <div className="glass rounded-2xl p-8 sm:p-10 animate-glow-pulse">
+                  <div className="venue-details py-8 sm:py-10">
                     <MapPin className="mx-auto mb-4 text-gold" size={28} />
-                    <p className="font-display text-2xl sm:text-3xl text-cream">Hassan Banquet</p>
+                    <p className="font-display text-2xl sm:text-3xl text-cream">P&amp;T Society</p>
                     <p className="mt-4 font-serif-l text-cream/75 leading-relaxed text-base sm:text-lg">
-                      Gate No 1, Coast Guard Chowrangi<br />
-                      Near Byco Petrol Pump<br />
-                      Korangi 2½, Karachi
+                      LD 128, P&amp;T Society<br />
+                      Korangi, Karachi
                     </p>
                     <div className="mt-7 overflow-hidden rounded-xl border border-gold/30">
                       <iframe
-                        title="Hassan Banquet Map"
-                        src="https://maps.google.com/maps?q=Hassan%20Banquet%20Korangi%20Karachi&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                        title="P&T Society, Korangi Map"
+                        src="https://maps.google.com/maps?q=LD%20128%20P%26T%20Society%20Korangi%20Karachi&t=&z=15&ie=UTF8&iwloc=&output=embed"
                         className="h-72 w-full"
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         allowFullScreen
                       />
                     </div>
-                    <a
-                      href="https://www.google.com/maps/search/?api=1&query=Hassan+Banquet+Korangi+Karachi"
+                    <Button asChild className="mt-7 h-12 rounded-full px-8 font-display"><a
+                      href="https://www.google.com/maps/search/?api=1&query=LD+128+P%26T+Society+Korangi+Karachi"
                       target="_blank"
                       rel="noreferrer"
                       onClick={burst}
-                      className="mt-7 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-gold/90 to-gold-soft/90 px-8 py-3 font-display text-ink shadow-[0_4px_24px_rgba(212,175,55,0.35)] hover:scale-105 transition-transform"
                     >
                       Open Location <ExternalLink size={16} />
-                    </a>
+                    </a></Button>
                   </div>
                 </FadeUp>
               </div>
@@ -321,26 +306,11 @@ function Invitation() {
                   <h2 className="font-display text-4xl sm:text-5xl text-gold-gradient">Event Timings</h2>
                 </FadeUp>
                 <Divider />
-                <div className="event-cards-row grid gap-6 sm:grid-cols-3">
-                  {[
-                    { icon: Crown, name: "Barat", time: "07 PM" },
-                    { icon: Utensils, name: "Dinner", time: "08 PM" },
-                    { icon: Heart, name: "Rukhsati", time: "09 PM" },
-                  ].map((c) => (
-                    <motion.div
-                      key={c.name}
-                      className="event-card glass rounded-2xl p-8 cursor-pointer"
-                      whileHover={{ y: -10, scale: 1.04, boxShadow: "0 20px 40px rgba(212,175,55,0.25)" }}
-                      whileTap={{ scale: 0.97 }}
-                      transition={{ type: "spring", stiffness: 250, damping: 18 }}
-                      onClick={burst}
-                    >
-                      <c.icon className="mx-auto text-gold" size={36} />
-                      <p className="mt-4 font-display text-2xl text-cream">{c.name}</p>
-                      <Divider />
-                      <p className="font-script text-5xl text-gold-gradient glow-text">{c.time}</p>
-                    </motion.div>
-                  ))}
+                <div className="event-cards-row flex flex-col items-center">
+                  <Clock className="text-primary" size={32} />
+                  <p className="mt-5 font-display text-4xl sm:text-5xl text-primary">{invitation.time}</p>
+                  <p className="mt-3 font-serif-l italic text-xl text-accent-foreground">{invitation.timeNote}</p>
+                  <p className="mt-5 text-foreground/75">Sunday, 18 October 2026</p>
                 </div>
               </div>
             </section>
@@ -348,14 +318,7 @@ function Invitation() {
             {/* ── FINAL ── */}
             <section className="relative flex min-h-[80vh] items-center justify-center px-6 py-24">
               <div className="text-center max-w-3xl">
-                <img
-                  src={ornament}
-                  alt=""
-                  width={1024}
-                  height={512}
-                  loading="lazy"
-                  className="final-ornament mx-auto w-72 opacity-80"
-                />
+                <Heart className="final-ornament mx-auto text-accent-foreground" size={48} strokeWidth={1} />
                 <FadeUp delay={0.3}>
                   <p className="mt-6 font-script text-4xl sm:text-6xl text-gold-gradient glow-text leading-snug">
                     Your Presence Will Make<br /> Our Day More Special
@@ -364,8 +327,8 @@ function Invitation() {
                 <FadeUp delay={0.6}>
                   <div className="mt-10 flex items-center justify-center gap-3 text-gold/65">
                     <SparkIcon size={16} />
-                    <span className="font-serif-l italic tracking-[0.4em] text-xs uppercase">
-                      Usman &amp; Mahnoor — 15.05.2026
+                    <span className="font-serif-l italic tracking-[0.12em] text-xs uppercase">
+                      Noor ul Ain &amp; Khaliq — 18.10.2026
                     </span>
                     <SparkIcon size={16} />
                   </div>
